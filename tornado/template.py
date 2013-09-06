@@ -219,6 +219,7 @@ class Template(object):
         self.name = name
         if compress_whitespace is None:
             compress_whitespace = name.endswith(".html") or \
+                name.endswith(".xml") or \
                 name.endswith(".js")
         if autoescape is not _UNSET:
             self.autoescape = autoescape
@@ -561,12 +562,10 @@ class _Text(_Node):
     def generate(self, writer):
         value = self.value
 
-        # Compress lots of white space to a single character. If the whitespace
-        # breaks a line, have it continue to break a line, but just with a
-        # single \n character
+        # Strip trailing whitespaces. Only non-empty lines will be appended
+        # to the writer buffer.
         if writer.compress_whitespace and "<pre>" not in value:
-            value = re.sub(r"([\t ]+)", " ", value)
-            value = re.sub(r"(\s*\n\s*)", "\n", value)
+            value = value.rstrip()
 
         if value:
             writer.write_line('_tt_append(%r)' % escape.utf8(value), self.line)
